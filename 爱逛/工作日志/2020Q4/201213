@@ -1,0 +1,204 @@
+本周工作计划
+  √ 商家后台接口安全确认
+  x 小程序内存使用情况调研
+  √ 小程序-我的-开通直播 更换头像 -喜康
+  x 社群福袋 -潘达，暂缓
+  √ 福袋升级 -潘达
+  √ 天网导出工具优化
+  - 爱逛接入有赞多客服
+  - 多网点支持海报分享带网店id -德文
+    进入直播间、商详、(其他可能唤起sku面板的情况) 时判断是否从分享链接带入 storeId，如有则跳过 storeId 的获取流程 
+  - 运营后台活动场次列表支持单场直播多活动 -喜康、吴刚
+  - 商品管理权限 -喜康、楷雄
+
+本周完成情况
+  周一
+    - 商家后台接口安全确认  -待杨威确认
+    - 商品管理权限 -后端接口 http://zanapi.qima-inc.com/site/service/view/1008878、等待确认需求
+  周二
+    - 小程序-我的-开通直播 更换头像 -喜康，待发布验收
+    √ 有赞多客服环境搭建 wap-im-web
+      创建有赞店铺
+      升级zanProxy到2.2.4 (解决了websocket连接不上的问题)
+      c端
+        客户端
+          /client 下 yarn dev
+          zanProxy 导入 client下的 zan-proxy-rules.json (im-c-fe-koko)，增加转发变量
+        node端
+          根目录下 yarn start:qa (仅能启qa，无法代理预发)
+          zanProxy 导入 server下的 zan-proxy-rules.json (im-c-node)，增加转发变量
+          server/client 下copy version_css.json 和 version_js.json
+      b端
+        客户端
+        node端
+          node端qa环境鉴权失败，无法本地调试，先发布到qa-sc环境
+    - 小程序内存使用情况调研 -使用内存快照未发现明显泄漏，暂缓
+  周三
+    有赞多客服项目开发
+      商家后台 b端
+        - 即时会话-右侧资料-会话来源 -待验证爱逛app渠道是否显示正确
+        - 即时会话-左侧列表-筛选 -待验证爱逛app渠道是否查询正确
+        x 即时会话-下方控制台-历史会话 http://zanapi.qima-inc.com/site/service/view/130846
+        - 历史会话-下方列表-会话来源 -待验证爱逛app渠道是否显示正确
+        x 客户中心-筛选-来源渠道、来源方式 http://zanapi.qima-inc.com/site/service/view/112303
+        x 历史会话-筛选-会话来源 - /api/oauthentry/youzan.message.courier.cp.consultant.combo/1.0.0/get
+        x 微商城app-来源方式 -微商城原生app
+        - 走一遍有赞的测试用例 https://qa.qima-inc.com/tcmPortal/exeTreeView?versionId=8392
+      - c端 会话页去掉顶部 
+  周四
+    - 多网点支持海报分享带网店id
+    - 运营后台-活动场次列表-支持单场多活动 -需求确认、等待接口
+  周五
+    √ 天网导出工具优化，支持导出6天
+
+  周六
+
+本周复盘总结
+  进度: 未延期 ｜ 延期 N 天
+  质量: 出现线上问题 N 次，产品验收发现问题 N 个
+  需要保持: 对任务的拆解较细致，对项目的进度把控较好
+  需要提高:
+  心得: 接到不熟悉的任务后需要对任务进行细致的拆解，包含搭建环境，功能开发、联调验收等步骤，记录每一步的进度和计划
+
+临时任务 & 下周计划
+  热卖推荐 库存改为消息推送，同时轮训接口改为1分钟/次，取轮训与推送记录的最低值
+           
+知识点记录
+  React
+    getDerivedStateFromProps 生命周期函数，将传入的props映射到state上面，每次re-rendering之前被调用
+
+  爱逛app接入有赞多客服项目总体梳理
+    移动端
+      生成会话链接
+        引入 @youzan/imc-components/dist/utils/generateUrl
+        调用 generateUrl 函数获得 h5 会话页面链接地址
+        调用 generateUrl 时传入来源 generateUrl({fromChannel: 'aiguangApp'})
+    前端
+      c端 - 给移动端提供h5页面
+        访问移动端生成的会话链接后，node端 在全局写入 login_biz_channel (基于 url 中的 fc，即 fromChannel)
+        client端 基于全局变量，使用 vuex 在store写入 envInfo.bizChannel (即 login_biz_channel)
+        client端 与 后端建立socket链接，发送认证信息token，以及 login_biz (基于envInfo.bizChannel)
+      b端 - 智能客服项目，会话来源增加 爱逛app
+    后端
+      login_biz 新增 aiguangApp
+
+    总结：
+      移动端: 调用 generateUrl 传 fromChannel: 'aiguangApp'
+      前端c端: 从 移动端生成的url中拿到 fromChannel，转为 login_biz 发给后端
+      前端b端: RegisterType 枚举新增 GuangApp = 'aiguangApp'
+      后端: 
+        toC: login_biz 新增 aiguangApp
+        toB: user_type 新增 aiguangApp (应该要基于login_biz)
+
+
+本周工作记录
+  小程序没有提供接口获取内存使用情况
+
+  memory - heap snapshot
+    小程序进入直播间 204 Mb
+      closure 34779464 / 95800736
+      array 32690696 / 39738256
+    等待一段时间 200 Mb
+      closure 34838088 / 99495784
+      array 31813176 / 37821688
+    通过裤腰带打开/关闭 sku 面板 10次 203 Mb
+      closure 34960096 / 98942560
+      array 32810360 / 39141104
+    通过裤腰带打开/关闭 sku 面板 20次 203 Mb
+      closure 34964384 / 98830840
+      array 32929488 / 39021096
+    打开/关闭 宝贝袋 10次 203 Mb
+      closure 34966896 / 99455304
+      array 32969832 / 39039240
+    通过宝贝袋打开/关闭 sku 面板 10次 204Mb
+
+    通过宝贝袋打开/关闭 商详页 10次 246Mb
+      closure 43434992 / 116426200
+      array 46180168 / 53007936
+    通过宝贝袋打开/关闭 商详页 20次 262Mb
+      closure 45075552 / 118664272
+      array 53191960 / 59413368
+    通过宝贝袋打开/关闭 商详页 30次 280Mb
+      closure 46685992 / 121190264
+      array 60612032 / 66905776
+    
+    之后打开sku 10次 280mb
+
+    之后打开宝贝袋 10次 280mb
+
+    由以上数据分析，宝贝袋和sku并没有造成明显的内存增长，而商详页的跳转造成了线性的内存增长
+    考虑每次快照都会进行一轮垃圾回收，内存总增量可能是失真的
+    详细对比每一项之后可以发现 closure、Observer、Dep、Set 等项是稳定增长的，推论确实存在泄漏
+
+  真机性能面板
+    进入直播间 610-630 Mb 波动
+
+    通过裤腰带打开/关闭 sku 面板 10次: 峰值720，逐步回落至 650左右
+    通过裤腰带打开/关闭 sku 面板 20次: 峰值740，逐步回落至 700左右
+    通过裤腰带打开/关闭 sku 面板 30次: 峰值770，逐步回落至 730左右
+
+    打开宝贝袋 10次: 峰值770，逐步回落至740左右
+    打开宝贝袋 20次: 峰值780，逐步回落至750左右
+    打开宝贝袋 30次: 峰值776，逐步回落至750左右
+
+    从宝贝袋打开 sku10次: 峰值830，逐步回落至 780左右
+    从宝贝袋打开 sku20次: 峰值860，逐步回落至 810左右
+    从宝贝袋打开 sku30次: 峰值890，逐步回落至 840左右
+
+    打开商详页10次: 峰值1142，逐步回落至 970左右
+    打开商详页20次: 峰值1150，逐步回落至 1040左右
+    打开商详页30次: 峰值1170，逐步回落至 1030左右
+
+    等待一段时间后降至 930
+
+    从以上数据分析: 
+      商详页造成了内存增长，但趋势变缓
+      sku造成了线性增长，但速率不高
+
+    650 15次sku 740 15次sku 800
+    注释掉 dispatch('toOpenSkuPanelPopup', payload);
+    670 N次sku 基本无变化
+    注释掉 commit('UPDATE_SKU_PANEL_PROPS', payload);
+    650 N次sku 峰值700，回落至650～660，基本无变化
+    注释掉 commit('UPDATE_SKU_PANEL_PROPS', payload); 之外的其他commit           
+    650 N次sku 峰值710，一段时间后回落至 660，无明显变化
+    注释掉 <sku-panel></sku-panel>
+    600 N次sku 无明显变化
+ 
+    不注释
+    进入直播间 650 等待1分钟左右 600 30sku 800 等待1分钟左右 730
+    注释掉 <new-goods-card>
+    进入直播间 650 等待1分钟左右 615 30次sku 720 等待1分钟左右 680
+    注释掉 <scroll-view>
+    进入直播间 650 等待1分钟左右 630 30次sku 720 等待1分钟左右 690 (预期 730-680+630=680，接近)
+    注释掉 getWrapStyle 和 <slot name="goods-source" />
+    进入直播间 670 等待1分钟左右 630 30次sku 710 等待1分钟左右 660
+    注释掉 达人 和 CPS
+    进入直播间 670 等待1分钟左右 630 30次sku 750 等待1分钟左右 680
+
+    615 -> 540 -> 10次
+    650 -> 590 -> 10次
+    675 -> 630
+  
+  打开 sku 面板流程梳理
+    this.OPEN_SKU_PANEL_POPUP({ dispatch, rootState }, payload = {})
+    payload.goodsInfo.partner.partnerType
+      -美业、教育 -> 商详
+      -多网点 在 payload上 添加 storeId (如果有)
+    dispatch('beforeOpenSkuPanel', payload);
+    验证登陆
+    如果是砍价购商品则获取砍价购相关信息
+    dispatch('toOpenSkuPanelPopup', payload);
+
+    commit('UPDATE_SKU_PANEL_PROPS', payload);  // 更新sku面板所需的props，对数据进行裁剪，取必须字段
+    commit('UPDATE_SKU_PANEL_PATH', _getCurrentPagePath()); // 记录唤起sku的页面路径
+    commit('TOGGLE_ACTIVE_POPUP_LIST', SKU_PANEL);  // popup开关，用于维护 popuplist
+    commit('UPDATE_SKU_PANEL_VISIBLE_STATE', true); // 
+    commit('UPDATE_SKU_PANEL_INIT_STATE', true);  // 更新sku面板初始状态
+    除购物车等不需要红包的场景外，获取红包信息 dispatch('fetchRedPacketList')
+
+  内存泄漏的常见场景
+    1、全局变量
+    2、DOM
+    3、定时器
+    4、闭包

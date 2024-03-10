@@ -1,0 +1,27 @@
+1、本周工作内容概述
+  砍价免费拿专区
+    1、待砍商品列表放弃使用 good-channel-list 组件，解决偶发单边渲染的问题
+    2、修改文案与样式
+    3、发起砍价 与 帮砍 事件增加埋点
+  津贴组件
+    1、修复未登陆领取津贴无提示问题
+    2、单张与两张津贴样式改版
+
+2、问题集
+  暂无
+
+3、心得
+  (1) 大图上传前手动压缩，在线工具地址 https://tinypng.com/
+  (2) 数据埋点添加流程：
+    新增页面 http://track.qima-inc.com/info/pageManagement
+    在有赞埋点系统中新增事件 http://track.qima-inc.com/b51
+    在合适的事件处理中调用 logger.log (也可以直接调用 app.js 中的封装方法 clickLogger 等，logger 是基于 @youzan/weapp-log-sdk 实例的封装，注册了默认事件) 
+  (3) 小程序发布流程
+    切换至 当日bus / merge / master 路径，执行 npm run release
+    模拟工具点击 '上传' 按钮，修改版本号与备注
+    上传完成后进入小程序管理 https://mp.weixin.qq.com/wxamp/wacodepage/getcodepage?token=985493563&lang=zh_CN
+    在 版本管理 中找到刚才提交的版本，在下拉选项中选择 切换为体验版
+    确认无误后提交审核，通过后可发布
+
+
+

@@ -1,0 +1,234 @@
+1、Vanx/Vuex 源码阅读 1-18 ～ 1-25
+  通用
+    state 和全局对象有什么不同 ？
+      state 是响应式的，对他的修改将会触发订阅他的依赖函数
+    
+  wex
+    store: {
+      vm,
+
+      commit,
+      dispatch,
+      _actions,
+      _mutations,
+
+      getters,
+      _wrappedGetters,
+      _namespacedGetters,
+
+      _moduleCollection,
+
+      get root: f() {},
+      get state: f() {},
+    }
+
+    特性: 
+      1、允许 将 state 中的数据作为 mutation 的数据源
+      2、引入 nextTick，将同一 watcher 的多次 update 的合并为一次
+        收到消息时，多次提交 action ，只触发一次 watch
+        在一个 action 中多次提交同一个 mutation, 只触发一次 watch
+        在一次 mutation 中多次修改 state, 只触发一次 watch
+        如果确实有需求要触发多次 watch，可以用 setTimeout
+      3、相比 vanx 的 name，wex 采用了与 vuex 相同的 namespaced 作为模块划分依据 ？
+      4、
+
+    总体流程
+      Store(options) todo: 调用时机:
+        boundDispatch
+        boundCommit
+        初始化属性 (通过代理，可以通过 Object.getOwnPropertyDescriptors 遍历)
+          vm
+          getters
+          root
+          _actions
+          _mutations
+          _wrappedGetters // wrappedGetter 的树形集合，
+          _namespacedGetters
+          _moduleCollection: new ModuleCollection (store, options)  // module 的树形集合
+            递归 register (store, new Route(), options)
+              new Module (options) 
+                this.state = deepCopy(options.state); // 相比vanx，不支持 state 以函数传入
+                  // 1000次deepCopy: 13.791259765625ms
+                  // 1000次JSON: 8.22607421875ms
+                  // deepCopy 解决了 循环依赖 的问题，但相对 JSON 性能有些许下降
+                observe(this.state);
+                  // 对 引用类型 做响应式
+                  def(obj, '__su__', new Subject());
+                  if (isArray(obj)) {
+                    patchArray(obj);
+                    observeArray(obj);
+                  } else if (isPlainObject(obj)) {
+                    observeObject(obj);
+                  }
+
+              $set(parent.state, route.current, module.state)
+                // 以响应式的方式，将当前 module 的 state 追加到 module.parent
+                defineReactive(target, key, val);
+                subject.notify();
+              module.install (store)
+                createContext
+                  定义 dispatch、commit
+                  代理 getters (从 store 上面捞取)、state (取 module 自身的 state)
+                registerGetters
+                  基于模块名，在 _wrappedGetters 中添加 wrappedGetter
+                  computer = new Computer(vm, rootType, () => wrappedGetter(store));
+                  computer.defineProperty(rootGetters, rootType, () => vm[rootType]);
+                registerActions
+                registerMutations
+
+    scheduler 调度器
+      响应式数据触发 set 时，会通知所有订阅过他的 watcher 执行 update
+      当频繁得修改同一数据时，往往只需要执行最后一次，调度器的作用相当于 函数节流
+      调度器的原理是维护一个 warcher 队列，放到 nextTick 后执行
+      若在 warcher 队列执行的过程中，触发了新的 update，则根据id将该 watcher 插入到队列的合适位置（warcher 队列中，watcher的id是递增的）
+
+    
+
+  Vanx
+    总体流程
+      Store() 调用时机: app-onLaunch、page-onLoad、component-ready
+        boundDispatch
+        boundCommit
+        递归 registerModule
+          Module()
+            递归 defineReactive(this, 'state', state) // 对象的 每个节点 都有自己的 Observer 实例
+              ob = Observer()
+                ob.dep = new Dep()
+                ob.get  // 收集依赖
+                ob.set  // 触发依赖
+              Object.defineProperty(target, key, ob)
+          installModule
+          computedGetters
+
+    模块/命名空间原理
+
+    响应式原理
+      基于 观察者模式，定义 dep 为 被观察者，watcher 为 观察者
+      调用 defineReactive 观测对象时，做了什么事情 ？
+        创建 Observer 实例，作为 Object.defineProperty 的描述符对象，主要是 get、set，和一个 Dep 实例
+          get: 收集依赖，将 dep 添加到 Dep.target(Watcher实例) 的 依赖列表(deps) 下，同时 将 watcher 添加到 dep 的订阅列表(subs)下
+          set: 触发依赖，通知 dep 下的所有订阅者(watcher)，触发其 update 和 done 方法
+          dep: 维护该属性的订阅者(watcher)列表
+
+          (dep 和 watcher 是多对多的关系，一个属性可以触发多个watcher，一个watcher也可以被多个属性触发)
+            dep.subs 记录了所有的 订阅者watcher 实例
+            watcher.deps 记录了所有订阅过的 监听对象
+          Dep.target 只在 特定的时机(watcher 的 get方法执行时) 被置为 watcher，调用的时机有 
+            创建watcher实例
+            watcher.update/run
+            watcher.evaluate
+          同时，watcher.get 执行时还会读取
+        递归观测传入的对象，对数组类型做原型函数劫持
+
+    watch 原理
+      vanx 的扩展api
+
+    watcher 分析
+      构造函数
+        ctx: store 实例
+        pathOrFn: 
+        cb: 
+        option: {
+          deep: 
+          immediate: 
+          lazy: 
+        }
+      
+      辅助属性
+        dirty: 
+        getter: 
+      
+      依赖相关
+        dep: 监听对象 实例，触发 watcher.evaluate 时，将自身加到 watcher.deps 中，同时将 watcher 纳入自身的订阅者列表 subs 下
+        deps: 订阅过的 依赖对象 列表
+        depIds: 订阅过的 依赖对象 列表的映射
+        addDep: 将 依赖对象dep 加入到 发布者列表watcher.deps 中，同时将 watcher 加入到 依赖对象dep 的 订阅者列表subs 下
+        cleanDeps
+
+      get
+      update
+      done
+      evaluate
+      unSubscribe
+
+    mutations 的作用，能否直接修改 state ？ --理论上可以，但不推荐
+      事实上，直接修改 state 也是可以 成功赋值 并且 触发watch 的
+      mutations 是一种约定，当所有的赋值操作都通过 mutations 来进行时，相当于修改的入口被固定了，状态的变化意图会更明确
+      view -> action -> mutation -> state -> view 构成了单向数据流
+      mutations 的本质是 namespacedType: callback[] 的键值对
+      注册 mutation 会在其对应的 回调池数组 中添加回调
+      调用 mutation 注册的回调则使用 commit
+
+    actions 作用，与 mutations 的区别 ？ --action 可以在异步操作结束后提交 mutation
+      action 不直接修改状态，而是 commit 了 mutation 来修改
+
+    commit / dispatch 的作用 ？ --分别用于提交 mutation 和 action
+      每个模块的 ctx 中都有自己的 commit / dispatch，但最终调用的都是 store 上的方法
+      上文说到 mutations 的回调池是数组，commit 的作用是 触发 某个mutation的所有回调
+      多次调用 commit 会被忽略，直到单次 commit 触发的回调执行完，这意味着 mutation 必须是同步函数
+      dispatch 与 commit 类似，但 触发的是 某个action的所有回调，调用方式是 Promise.all，因此 action 可以是异步操作
+
+    getter 作用，与 computed 有什么区别 ？ --getter是store中的计算属性
+      getter 是 store 中的计算属性，用于从 state 中派生出一些状态
+      getter 会以 lazy 的选项创建一个 Watcher 实例，具有缓存特性，仅当其依赖值发生变化(如state改变)，才会重新 调用函数 计算返回值
+        registerGetter 时，vuex 中直接返回了 rawGetter()，创建 watcher 的过程是 vanx 特有的
+
+    辅助函数 mapState / mapMutations / mapGetters / mapActions
+      提供了 外部 与 指定模块 的快速通道，提供了 快速声明 和 快捷调用 的能力
+      以 mapMutations 为例，触发一个模块的 某个mutation，需要找到该模块并触发 commit
+      mapMutations 向外部暴露了 调用模块commit的快捷方法
+
+  Vuex
+    state
+
+    getters
+      getter 通常是返回一个计算后的新值，但是也支持 返回一个函数 以实现向getter传参，用这种方式取 getter 的值将不再具有缓存特性
+        getters: {
+          name: (state) => {
+            return state.name
+          },
+          age: (state) => {
+            return (name) => {  // 返回一个函数，以支持传参，这种方式取 getter 的值将不再具有缓存特性
+              return state.persons.find(v.name === name).age
+            }
+          }
+        }
+
+    mutations
+
+    actions
+
+    modules
+
+    构造器选项
+      plugins / subscribe / subscribeAction
+      strict: 严格模式下，任何 mutation 处理函数以外修改 Vuex state 都会抛出错误
+
+    4.x(基于Vue3) 有哪些变动 ？
+
+  小结
+    Vanx 与 Vuex 有哪些区别 ？
+      (1) 构造器的区别，Vanx 是 Vuex 的阉割版，仅支持传入 module 的配置，Vuex 支持更多功能，比如 plugins
+      (2) Vuex 依赖 Vue，比如数据观测是直接使用的 Vue.set, Vanx 则是自己实现了这部分
+
+2、Vue-router 文档/源码 阅读 1-25 ～ 2-8
+
+3、Vue3 文档/源码 阅读 2-8 ～ 2-22
+
+4、Vue SSR 文档/源码 阅读
+
+4、小程序框架 https://developers.weixin.qq.com/ebook?action=get_post_info&token=935589521&volumn=1&lang=zh_CN&book=miniprogram&docid=0006a2289c8bb0bb0086ee8c056c0a
+  双线程模式
+  shadow-root
+
+5、express、koa、egg、nest
+  express: 提供了 路由、模版引擎、MVC、cookie、session 等功能，支持中间件扩展
+  koa: 中间件使用洋葱模型，几乎不再内置中间件，灵活性强的同时也使得 开发没有成熟统一的规范
+  egg.js: 基于 koa，整合了一套最佳实践，不支持ts
+    midwayJS: 淘宝团队基于 egg.js, 支持了ts
+  nest: 基于 express，支持 ts
+
+  next
+    react 开发框架
+  nuxt
+    vue 开发框架
