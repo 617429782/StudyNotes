@@ -1,0 +1,63 @@
+1、let 和 const
+  三个特性：
+    (1) 不提升，存在暂时性死区
+      暂时性死区：js引擎解析到let和const变量声明时，将其存放到暂时性死区直到声明执行完成后移出，期间访问死区内对变量将报错
+    (2) 不能重复声明
+    (3) 不影响块级作用域外部(if)，不绑定全局作用域，for循环不泄漏变量
+  
+  // https://github.com/v8/v8/blob/4b9b23521e6fd42373ebbcb20ebe03bf445494f9/test/mjsunit/es6/block-for.js
+  for 循环的隐藏作用域
+    let 变量作为 for循环条件语句时，每次循环都将创建一个隐藏作用域包裹执行语句
+      // 常规for循环中，每次迭代都将创建一个新的变量给循环体
+      let a = []; 
+      for (let i = 0; i < 3; i++) { a.push(() => console.log(i)) }; 
+      a.forEach(f => f()) // 0 1 2
+      // 循环3次将创建3个i变量，以上一次迭代中的同名变量值进行初始化，而不是修改同一个i变量的值
+      用伪代码的形式理解为 (此处无法解释 setTimeout 问题，待修改)
+        {
+          let i = 0
+          { console.log(i) }
+          i++
+          { console.log(i) }
+          i++
+          { console.log(i) }
+          i++
+        }
+      这样可以解释几个现象
+        (1) 循环体内可以重复声明循环条件中定义的变量
+          for (let i = 0; i < 3; i++) { let i = 1 }   
+          // 不报错, 循环条件 与 循环体 并非同一个作用域，而是嵌套关系
+        (2) 循环体内可以改变循环条件中的变量
+          for (let i = 0; i < 3; i++) { i = 10; console.log(i) }   
+          // 只执行了第一次，执行体内对变量的修改影响了执行条件中的同名变量，再次证明嵌套关系
+        (3) const 无法声明循环条件的变量
+          for (const i = 0; i < 3; i++) { console.log(i) }
+          // 由此可见循环条件内存在对变量 i 对修改，即 i++
+        (4) for (let i = 0; i < 3; i++) { setTimeout(() => { console.log(i) }, 0) } 
+  
+  for in 与 for of 循环中的表现
+    var 变量仍然存在泄漏问题
+      let a = [], o = { a: 1, b: 2, c: 3 }; 
+      for (var i in o) { a.push(() => console.log(i)) }; 
+      a.forEach(f => f()) // c * 3
+
+      let a = [], o = ['a', 'b', 'c']; 
+      for (var i of o) { a.push(() => console.log(i)) }; 
+      a.forEach(f => f()) // c * 3
+    
+    与for循环不同的是，for in 与 for of 循环可以用const变量，因为每次迭代 不修改原变量 而是 创建新变量
+      let a = [], o = { a: 1, b: 2, c: 3 }; 
+      for (const i in o) { a.push(() => console.log(i)) }; 
+      a.forEach(f => f()) // a b c
+
+      let a = [], o = ['a', 'b', 'c']; 
+      for (const i of o) { a.push(() => console.log(i)) }; 
+      a.forEach(f => f()) // a b c
+
+
+  var 声明的过程: 创建、初始化为undefined
+    因此 console.log(x); var x = 1 // undefined
+  function 声明的过程: 创建、初始化、赋值
+    因此 console.log(f); function f(){ console.log(1) } // ƒ f(){ console.log(1) }
+    fn(); function fn(){ console.log(2) } // 2
+  let 声明的过程

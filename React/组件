@@ -1,0 +1,38 @@
+function Component(props, context, updater) {
+  this.props = props;
+  this.context = context;
+  this.refs = emptyObject;
+  this.updater = updater || ReactNoopUpdateQueue;
+}
+// 此方法可能是异步的，不会立即更新 this.state
+// 多个 setState 可能会被合并
+Component.prototype.setState = function(partialState, callback) { };
+Component.prototype.forceUpdate
+
+概述
+  组件接受 只读的props，返回描述页面内容的 React元素对象
+  组件的 状态更新 时会调用自身的 render 方法，重新渲染 当前时刻的元素
+
+组件的两种形式
+  函数组件
+    function People(props) {
+      return <div>Hello, {props.name}</div>;
+    }
+  类组件
+    class People extends React.Component {
+      render() {
+        return <div>Hello, {this.props.name}</div>;
+      }
+    }
+  差异：
+    函数组件：
+      useEffect 可以用于监听某个属性变化
+    class组件：
+
+
+组件间传值
+  props 父子组件
+  context 在一系列组件树中共享，即，在根元素中声明，子孙元素皆可访达
+
+组件组合: 在组件间复用代码
+  props 允许传递 React 元素，可以想 slot 一样从上级元素向下传递代码片段

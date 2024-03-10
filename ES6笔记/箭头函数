@@ -1,0 +1,6 @@
+特性
+  没有this，通过查找作用域链确定this
+  没有自己的 arguments (可以用 ...args 代替), 也是指向外层
+  没有 constructor 构造方法，不能用 new 调用
+  没有原型
+  没有super
