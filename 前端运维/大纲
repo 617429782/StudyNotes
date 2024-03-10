@@ -1,0 +1,21 @@
+设计 Design
+
+编码 & 审查 code & review
+
+测试 test
+  冒烟测试 https://zhuanlan.zhihu.com/p/39786718
+
+上线 CI/CD 上线部署
+  nginx 服务器部署
+  docker 容器技术
+  Jenkins
+
+环境 QA/预发/生产
+
+发布 正常/蓝绿/灰度
+
+发现问题 issue
+
+问题排查
+
+问题修复 hotfix

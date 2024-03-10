@@ -1,0 +1,48 @@
+尾调用:
+  定义: 函数 return 时返回了其他函数的执行结果
+  尾递归: 函数 return 时调用了自身的执行结果
+  示例: 
+    // 尾调用
+    function f(x){ 
+      return g(x); 
+    }
+
+    // 尾调用, 虽然尾调用没出现在函数尾部，但是只要是最后一步操作即可
+    function f(x) {
+      if (x > 0) return m(x)
+      return n(x);
+    }
+
+    // 不属于尾调用， 调用函数g之后，还有赋值操作
+    function f(x){
+      let y = g(x);
+      return y;
+    }
+
+    // 不属于尾调用， 调用后还有操作，即使写在一行内
+    function f(x){
+      return g(x) + 1;
+    }
+
+    // 不属于尾调用，下面的两个函数等同
+    function f(x){
+      g(x);
+    }
+    function f(x){
+      g(x);
+      return undefined;
+    }
+  优点:
+    函数嵌套调用时会形成调用栈，尾调用由于是最后一步操作，不需要保留外层调用帧，因此不增加栈的高度，当然闭包的情况除外
+  证明:
+    定义一个求次方的函数，以正常递归的方式调用足够大的次数, 浏览器将报错提示栈溢出
+      function pow(v, n){
+        return n > 1 ? v * pow(v, n-1) : v
+      }
+      pow(2, 1000000000)  // Maximum call stack size exceeded
+
+    改写成尾递归的形式(实测没有作用，仍然报错)
+      function pow(v, n, r = 1){
+        return n >= 1 ? pow(v, n-1, v * r) : r
+      }
+      pow(2, 1000000000)  // Maximum call stack size exceeded

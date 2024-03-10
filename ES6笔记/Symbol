@@ -1,0 +1,4 @@
+数据类型 Symbol，表示独一无二的值，没有字面量形式
+
+Symbol 值通过 Symbol 函数生成，Symbol 函数不能用 new 调用
+  var s = Symbol();

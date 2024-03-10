@@ -1,0 +1,24 @@
+概述
+  事件的命名采用小驼峰 (首字母小写的驼峰)，事件回调用 {} 包裹
+  React 的事件不能 return false 阻止默认行为 (如表单的跳转), 需调用 preventDefault
+  事件绑定this的3种方式: bind fields 箭头函数
+  回调事件传参只能通过 bind 和 箭头函数
+
+class组件中，事件绑定this的3种方式: bind fields 箭头函数
+  class C extends React.Component {
+    handleClick() { console.log(this) }   // undefined
+    handleClick1() { console.log(this) }  // C bind
+    handleClick2 = () => { console.log(this) }  // C, fields语法，实验阶段
+    handleClick3() { console.log(this) }  // C 箭头函数，其作为prop传入子组件时可能会导致多次熏染
+    
+    render() {
+      return (
+        <div>
+          <button onClick={this.handleClick}></button>
+          <button onClick={this.handleClick1.bind(this)}></button>
+          <button onClick={this.handleClick2}></button>
+          <button onClick={() => { this.handleClick3() }}></button>
+        </div>
+      )
+    }
+  }
