@@ -6,7 +6,7 @@
   2. 引用类型 Object
     引用类型 变量值 存放于堆空间(其指针地址存于栈空间), 可动态改变大小
 
-## 执行上下文 / 闭包 / 作用域
+## 执行上下文 / 闭包 / 作用域 https://www.cnblogs.com/joeynkay/p/13527069.html
   1. 执行上下文(this、词法环境(作用域)、变量环境): JS引擎执行一段代码所需的全部信息
     绑定this: 被引用对象调用时, 指向调用者, 否则指向 window (严格模式下指向 undefined)
     创建词法环境(作用域): 
@@ -24,15 +24,52 @@
     1. var 变量会在执行上下文的开头被初始化为 undefined, 因此可以在声明前使用而不报错, 称为变量提升  
     2. 其源于创建执行上下文对 var、let 等不同的处理  
     3. let、const 被初始化为 uninit 状态, function 也被初始化为 func 类型, 存储在 词法环境 中  
-    4. 而 var 被初始化为 undefined, 存储在 变量环境 中  
+    4. 而 var 被初始化为 undefined, 存储在 变量环境 中
 
-## this / bind / call / apply
+## this / new / bind / call / apply
   1. this 绑定的五种规则:  
     默认绑定: 函数没有调用者时, this 指向 window
     隐式绑定: 函数有调用者时, this 指向 调用者
     显示绑定: 函数以 call、apply 的方式调用时, this 指向第一个参数, bind 方法会返回一个具有固定 this 的新函数
     new绑定: 构造函数被调用时, this指向生成的对象
     箭头函数绑定: 为箭头函数创建执行上下文时, 不会绑定this, 其this指向父级执行上下文的this
+    ```
+      // o1、o1、w、w、w、o2、w、o1、o1、o2、w
+      var name = 'window'
+      var o1 = {
+        name: 'o1',
+        fn1: function () {
+          console.log(this.name)
+        },
+        fn2: () => console.log(this.name),
+        fn3: function () {
+          return function () {
+            console.log(this.name)
+          }
+        },
+        fn4: function () {
+          return () => console.log(this.name)
+        }
+      }
+      var o2 = { name: 'o2' }
+      var fn5 = o1.fn1
+
+      o1.fn1()
+      o1.fn1.call(o1)
+
+      o1.fn2()
+      o1.fn2.call(o2)
+
+      o1.fn3()()
+      o1.fn3().call(o2)
+      o1.fn3.call(o2)()
+
+      o1.fn4()()
+      o1.fn4().call(o2)
+      o1.fn4.call(o2)()
+
+      fn5()
+    ```
 
   2. 手写 new
     分析: 创建新对象、以新对象作为this调用构造函数、将新对象的 __proto__ 指向函数的原型、返回这个新对象
@@ -44,34 +81,37 @@
     }
 
   3. 手写 call / apply / bind
-    // 利用 隐式绑定, 让函数的 this 指向调用者
-    Function.prototype.myCall = function(target, ...args) {
-      target.fn = this  // 此处的this即函数对象本身
-      target.fn(...args);
-      delete target.fn
-    }
-
-    Function.prototype.myApply = function(target, args) {
-      target.fn = this  // 此处的this即函数对象本身
-      target.fn(...args);
-      delete target.fn
-    }
-
-    // 利用闭包, 让返回的函数在执行时仍然可以访问 定义时的词法环境
-    Function.prototype.myBind = function(target, ...args) {
-      const self = target;
-      const fn = this;
-      return function () {
-        self.fn = fn  // 此处的this即函数对象本身
-        self.fn(...args);
-        delete self.fn
+    ```
+      // 利用 隐式绑定, 让函数的 this 指向调用者
+      Function.prototype.myCall = function(target, ...args) {
+        target.fn = this  // 此处的this即函数对象本身
+        target.fn(...args);
+        delete target.fn
       }
-    }
+
+      Function.prototype.myApply = function(target, args) {
+        target.fn = this  // 此处的this即函数对象本身
+        target.fn(...args);
+        delete target.fn
+      }
+
+      // 利用闭包, 让返回的函数在执行时仍然可以访问 定义时的词法环境
+      Function.prototype.myBind = function(target, ...args) {
+        const self = target;
+        const fn = this;
+        return function () {
+          self.fn = fn  // 此处的this即函数对象本身
+          self.fn(...args);
+          delete self.fn
+        }
+      }
+    ```
 
 ## 原型 / 继承
-  1. 原型链 https://www.jianshu.com/p/7119f0ab67c0
-    prototype 是 函数的原型对象, 它会被函数生成实例的 __proto__ 引用
-    函数原型对象中的属性和方法是所有实例共享的
+  1. [原型链](https://www.jianshu.com/p/7119f0ab67c0)
+    实例的 __proto__ 等于 构造函数 的 prototype
+    prototype 是一个对象，其下属性被所有实例共享
+    实例访问属性时优先读取实例属性，而后是原型属性，再往上追溯原型
     所有构造函数的原型链最终都将指向 Object.prototype, Object.prototype.__proto__ === null
 
   2. es5 继承的实现方式
@@ -124,6 +164,10 @@
         return result
       }
     ```
+  3. StructuredClone(value, { transfer: [可转移的对象] }) API https://juejin.cn/post/7080433165264748557#heading-6
+    - 特性：
+      不允许克隆 Error、Function 和 DOM 对象，如果对象中含有，将抛出DATA_CLONE_ERR异常
+      不保留原型链
 
 ## 事件机制
   1. 事件机制
@@ -209,39 +253,44 @@
     ```
   4. 节流 + 防抖: 在保证执行的前提下, 减少执行总数
     ```
-      function lazy (cb, delay) {
-        let last = Date.now();
-        let timer;
-        return (...args) => {
-          const now = Date.now()
-          let done = false;
-          // 节流
-          if ((now - last) > delay) {
-            last = now;
-            done = true;
-            cb.apply(null, args)
+      // 防抖：多次触发只执行最后一次
+      // 节流：单位时间内只触发一次
+
+      function lazy(fn, delay) {
+        let now = Date.now()
+        let timer = null
+        return function(...args) {
+          // 单位时间内只触发一次
+          if (Date.now() - now >= delay) {
+            now = Date.now()
+            return fn.call(this, ...args)
           }
-          // 防抖
-          if (!done) {
-            if (timer) clearTimeout(timer);
-            timer = setTimeout(() => {
-              cb.apply(null, args) 
-            }, delay)
-          }
+          // 多次执行仅触发最后一次
+          if (timer) clearTimeout(timer)
+          timer = setTimeout(() => {
+            fn(...args)
+          }, delay)
         }
       }
 
-      window.addEventListener('scroll', lazy(()=>{console.log(1)},500))
+      const fn = function(args) { console.log(args, this) }
+      const o = { todo: lazy(fn, 1000) }
+      console.time('cyk')
+      const count = 1000000
+      for (let i = 0; i < count; i++) {
+        o.todo(i)
+      }
+      console.timeEnd('cyk')
     ```
 
 ## 函数式编程 https://zhuanlan.zhihu.com/p/363757919
   1. 纯函数: 函数式编程的本质
     无状态: 在任意上下文中调用任意次数, 返回的结果都是一样的
     无耦合: 返回值只取决于入参, 不依赖/修改外部变量, 也应该避免修改引用类型的入参
-  2. 优点: 易调试、易组合
+  2. 优点: 面向过程，易调试、易组合
   3. 缺点: 不适用于需要保持状态的场景, 比如分页查询, 更多得用于 工具库
   4. 应用场景
-    1. 函数合成: const entry = compose(add, minus, ...) 
+    1. 高阶函数: const entry = compose(add, minus, ...) 
       ```
         function compose (init, ...fns) {
           let result = init;

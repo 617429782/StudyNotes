@@ -101,7 +101,7 @@
     作用: 
     教程: https://www.cnblogs.com/ayseeing/p/3572582.html
 
-  github 访问加速
+  github 访问加速 https://cloud.tencent.com/developer/article/1426844
     github 访问慢的一个原因是服务器在海外, dns耗时较长
     可以修改本地 hosts 文件 /etc/hosts (需要sudo), 就近指定ip, 跳过dns解析
     网络寻址工具 http://tool.chinaz.com/dns/
@@ -116,6 +116,11 @@
   合并 commit
 
   查看历史版本
+    log
+    show
+    reflog: 相比 log，reflog 可以获取到已被删除的 commit 记录
+    rev-list: 时间倒序输出指定条件的 commit 记录 https://cloud.tencent.com/developer/section/1138780
+
     场景: 
     操作: 
 
@@ -144,3 +149,19 @@
 
   - 撤销某次提交, 撤销操作需作为新的 commit 提交
     git revert <commitId>
+  
+## 命令详解
+
+
+
+## pro git
+  分支 是一个指针，指向 某一系列 commit 对象中的 首个
+  HEAD 指针永远指向当前所处的 分支，即 git branch 列出带 * 的那个，可以理解成 当前分支的别名
+
+  commit 对象的产生时机
+    git commit 命令执行时，会在当前 HEAD所处分支 指向的 commit 对象之上，创建一个新的 commit 对象，HEAD所处分支 跟随指向新对象
+
+  一个 commit 对象包含
+    tree 对象：文件的索引信息
+    若干个 blob 对象：每个文件内容对应的 blob 对象
+    其他提交元信息，比如 提交者、提交时间 等等

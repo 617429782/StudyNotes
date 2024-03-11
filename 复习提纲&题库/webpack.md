@@ -220,6 +220,14 @@
         不能用 call 触发，只能通过 callAsync 或者 promise，可以触发 tap、tapAsync、promise 注册的回调
         - AsyncSeries: 异步串行钩子
         - AsyncParallel: 异步并行触发
+    
+    - 使用示例
+      SyncHook
+      SyncBailHook
+      SyncWaterfullHook
+      SyncLoopHook
+
+      AsyncSeriesBailHook
   
   - 实现原理
 
@@ -337,3 +345,6 @@ webpack
   - parcel
 
   - webpack 的优势
+
+
+
