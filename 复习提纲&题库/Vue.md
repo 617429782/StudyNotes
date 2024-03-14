@@ -273,6 +273,11 @@
   directives?: VNodeDirective[];
   keepAlive?: boolean;
 
+  - VNodeData.data.props、VNodeData.data.attrs、VNode.componentOptions.propsData 之间的关系（extractPropsFromVNodeData）
+    propsData 由 props 和 attrs 合并生成
+    createComponent 时，会遍历组件定义的 propOptions，依次从 props、attrs 找对应的属性值则加入 propsData，且若取自 attrs，还会删掉该属性
+    因此在分不清属性应该放在 props 还是 attrs 时，可以只用 attrs 来传递属性
+
 ## render 函数
 - 作用: 递归调用 createElement，构建 vnode 树
 - 原理: 
