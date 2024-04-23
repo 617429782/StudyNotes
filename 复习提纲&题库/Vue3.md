@@ -100,6 +100,10 @@
   - 对于组件，编译为 modelValue + update:modelValue
   - 对于有修饰符的配置，如 (v-model:title.capitalize), 将生成 title 和 titleModifiers 两个 prop
 
+## 自定义渲染 (render、h)[https://cn.vuejs.org/guide/extras/render-function.html]
+- 与 vue2 createElement 的差异
+  todo: 参数差异
+
 ## 组合式 API vs 选项式 API
 - 组合式: 支持 <srcipt setup /> 和 setup(props, ctx) 两种用法，本文内称为 声明式 和 函数式
   - 声明式: 
