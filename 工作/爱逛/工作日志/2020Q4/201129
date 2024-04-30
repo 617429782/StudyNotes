@@ -1,0 +1,12 @@
+es6 模块
+  export {}
+  export function fn() {...}
+  export var/let/const xx = xx
+
+
+kdtId this.ctx.kdtId
+yzUserId、userId this._getUserId - this.ctx.getLocalSession('userInfo').id
+guangBusinessId this._getGuangBusinessId - this.ctx.guangBusinessId
+guangUserId this._getUserId
+
+

@@ -1,0 +1,31 @@
+1、活动报名页验收时出现页面卡死到情况
+  直接原因: 请求参数未返回特定参数，导致页面报错死循环渲染，开发时自测未覆盖到该情况
+  原因分析: 
+    const { arr = [] } = props;
+    const [data, setData] = useState([]);
+    useEffect(() => {
+      setData(arr.map((v,i) => i))
+    }, [arr]);
+
+    当父组件未下发arr时，该段代码会报错
+    Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+  教训: 以 prop 作为useEffect的依赖时，指定默认值并不保险，因为当父组件未下发时，每次render都会重新为其赋值，进而触发回调
+
+
+2、目前商家后台的 webpack 做了哪些事情
+  调试入口 node build-app.js
+  读取 dev.config 配置
+    base.dev.config
+    注册 WebpackPluginServe 插件
+      整合插件配置项
+      监听 compiler 对象的hook：done, invalid, watchClose, watchRun
+      初始化 HotModuleReplacementPlugin
+      
+      
+    注册 DllReferencePlugin： base-manifest.json、vendor-manifest.json，主要是 node_modules 里的一些模块
+    wekpack.config.dev.js 这里只做了别名配置
+    
+  用 SpeedMeasurePlugin.wrap 包装配置 config
+  调用 webpack 构造方法返回 compiler 对象
+  监听 fe-pc-build-dev 事件，触发 ora(一个动画库) 的渲染，这个部分应该只是为了好看
+  compiler.watch

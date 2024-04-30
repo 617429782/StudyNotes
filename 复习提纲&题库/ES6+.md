@@ -297,6 +297,18 @@
     async 返回一个 fulfilled 状态的 Promise 实例
     await 等待 Promise 实例的异步返回
 
-  2. async 与 promise 的执行顺序
+  2. async 与 事件循环
+
+  3. 实现原理 
+    https://zhuanlan.zhihu.com/p/115112361
+    https://juejin.cn/post/7029324739055190046
 
 ## Set / Map / WeakSet / WeakMap
+  Map 与 WeakMap: https://cloud.tencent.com/developer/article/1862103
+    Map 的用法:
+      API: get/set/has/delete/clear、keys/forEach/entries
+      适用场景:
+        - 频繁增删键值对的场景
+    WeakMap 的作用: 解决 对象/数组 对其 属性/子元素 的引用而导致无法垃圾回收的问题
+
+  Set: add() / has() / delete() / clear() / forEach()  
