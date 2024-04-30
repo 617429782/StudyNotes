@@ -1,3 +1,12 @@
+## 开发框架
+  - express: 对 node.http 回调的封装, 提供了 路由、中间件、模版引擎 等功能。
+  - koa: 相比 express 仅保留中间件逻辑，不内置 路由、模版引擎 等功能。中间件采用洋葱模型，同时在异常处理上更友好。
+  - egg: 对 koa 的封装，MVC 开发模式，约定大于配置，提供 Loader 加载并整合特定目录/名称的文件，提供插件机制作为扩展配置的单元，相比直接修改配置或者增加中间件，插件提供是否启动、加载顺序等精确控制。
+  - nest: 通过模块和装饰器处理事务，依赖注入和控制反转的思想，与 egg 相比分别跟 springboot 和 springmvc 类似
+  
+  - era: 与 egg 功能类似，内置了美团的企业级插件。
+    - sequelize: 数据库操作
+
 ## node 模块
   - node 中的模块分为 核心模块、文件模块
     核心模块: node内置模块(如: path), 在node源码编译时就被编成了二进制执行文件, 在node进程启动时直接加载进内存, 速度最快
@@ -19,6 +28,19 @@
           module.exports = hello;
         })(Module.exports)
       ```
+  
+  - [核心模块列表](https://nodejs.cn/api/async_hooks.html)
+    - assert 断言
+    - async_hooks 异步钩子
+      特点:
+      应用场景:
+      实现:
+      参考资料:
+        [深入理解Node.js的Async hooks](https://zhuanlan.zhihu.com/p/398853897)
+        [使用 Node.js 的 Async Hooks 模块追踪异步资源](https://zhuanlan.zhihu.com/p/346978980)
+    - process 进程
+    - child_process 子进程
+    - cluster 集群
 
 ## node 的组成
   1. v8 引擎 
@@ -62,3 +84,12 @@
   1. node 中的事件循环跟浏览器中有什么不同 (见 JS基础-事件循环)
 
   2. commonJS 的模块加载流程
+
+  3. node 执行流程
+    1. 初始化阶段
+      初始化 V8 实例
+      配置 libuv
+      初始化 Node 实例
+      运行 Node 实例
+      回收 V8 实例
+    2. 

@@ -315,9 +315,10 @@ async 会开始下载脚本, 但不阻塞UI线程, 等下载完成后再执行, 
 
 defer 会让脚本在页面完成加载后执行
 
-typeof 的两个问题
+typeof 的问题
   null 被判定为 object
   function 被判定为 function
+  array 被判定为 []
 
 有三种函数可以将 字符串 转为 数字
   Number(), 与 + 一元操作符遵循同样的规则

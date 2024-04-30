@@ -52,6 +52,18 @@ npm 常用命令 https://blog.csdn.net/baoao1875/article/details/101642210
     若 package.json 被修改，且新版本与 lock 文件里的版本对照不符合 semver 规范，则更新 lock 文件
     semver 规范 
 
+## 项目依赖
+  https://blog.csdn.net/hujinyuan357/article/details/99621542
+  https://zhuanlan.zhihu.com/p/390218026
+  dependencies
+  devDependencies
+  peerDependencies: 行为取决于 宿主、模块的 dependencies，以及 npm 版本
+    1. 宿主、模块的 dependencies 分别声明两个依赖版本，则宿主和模块的 node_modules 都进行安装
+    2. 仅宿主的 dependencies 声明版本，则忽略模块的 peerDependencies，仅在宿主的 node_modules 中安装
+    3. 宿主 dependencies 未声明依赖库的版本，则根据模块的 peerDependencies，只在模块的 node_modules 进行安装
+    4、npm（3.x 版本之后，7.x 之前）、yarn 不会自动安装该配置下的依赖模块，即需要用 8.x 的 npm 安装
+
+
 ## npm link
 
 ## yalc https://mp.weixin.qq.com/s/QGzjE9QPzppttULsR3GuDg

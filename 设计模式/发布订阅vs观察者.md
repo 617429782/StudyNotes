@@ -16,9 +16,9 @@ class Subject {
 
 // 观察者类 伪代码
 class Observer {
-  ?subs: [],          // 非必须的, 观察过的所有 Subject 实例
-  ?addSub() {},       // 同样是非必须的
-  ?removeSub() {},    // 同样是非必须的
+  subs: [],          // 非必须的, 观察过的所有 Subject 实例
+  addSub() {},       // 同样是非必须的
+  removeSub() {},    // 同样是非必须的
   update() {},
 }
 
