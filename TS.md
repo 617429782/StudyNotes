@@ -1,6 +1,7 @@
 - TypeScript
   - 类型注解：为 函数参数 或者 变量 添加类型约束 用法 let x: number = 1
-    基础类型 string / boolean / number
+    基础类型：
+      string / boolean / number
     引用类型 object
     数组：相同类型的不定长元素集合
       number[] / Array<number>
@@ -56,6 +57,8 @@
         x = y; // OK
         y = x; // Error, because x() lacks a location property
 
+  - 类型映射
+
   - 接口：类似于结构体的概念, 注意各属性分割使用 ; 而非对象的 , 
     interface Person {
       name: string;
@@ -105,11 +108,15 @@
       let output = fn<string>("123"); // "123" 函数传入的是string类型，因此return的也是string类型
       let output = fn("123");         // "123" 因为 类型推论 的存在，编译器会判断入参的类型，因此可以省略 <>
 
+    范型约束: 通过继承约束 T 的范围
+      interface Person { name: string }
+      function fn<T extends Person>(arg: T): T {
+        return arg;
+      }
+
   高级类型
     交叉类型：多个类型合并为一个类型，
 
     联合类型
 
     Partial<T>: 将某个接口定义的类型所有属性变为可选
-
- 
